@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react'
 import { Row, Col } from 'react-bootstrap'
 import VideoCard from "./videoCard";
-import { getAllVideosAPI } from '../services/allAPI';
+import { getAllVideosAPI, saveVideoAPI, updateCategoryAPI } from '../services/allAPI';
 
-const View = ({ addResponseFromHome, deleteResponseFromCategory }) => {
+const View = ({ addResponseFromHome, deleteResponseFromCategory, setDeleteResponseFromView}) => {
   const [deleteVideoResponseFromVideoCard, setDeleteVideoResponseFromVideoCard] = useState("")
   const [allVideos, setAllVideos] = useState([])
   useEffect(() => {
@@ -26,9 +26,30 @@ const View = ({ addResponseFromHome, deleteResponseFromCategory }) => {
     }
   }
 
+  const dragOverView = (e) => {
+    e.preventDefault( )
+  }
+
+  const categoryVideoDropOverView = async (e) => {
+    console.log("Inside categoryVideoDropOverView");
+    const {video, categoryDetails} = JSON.parse(e.dataTransfer.getData("dragData"))
+    console.log(video, categoryDetails);
+    const updateCategoryVideoList = categoryDetails?.allVideos?.filter(item => item.id != video?.id)
+    const updatedCategory = {...categoryDetails, allVideos : updateCategoryVideoList}
+    console.log(updatedCategory);
+    // updating the category by delete video from category using api
+    const result = await updateCategoryAPI(updatedCategory)
+    // use state lifting to communicate data from view to category
+    setDeleteResponseFromView(result)
+    // use api to upload video
+    await saveVideoAPI(video)
+    // call getAllVideo()
+    getAllVideos()
+  }
+
   return (
     <>
-      <Row>
+      <Row dropable="true" onDragOver={dragOverView} onDrop={e => categoryVideoDropOverView(e)}>
         {
           allVideos?.length > 0 ?
             allVideos?.map(video => (

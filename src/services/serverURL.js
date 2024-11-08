@@ -1,3 +1,3 @@
-const SERVERURL = "http://localhost:3000"
+const SERVERURL = "https://mp-server-rf2b.onrender.com"
 
 export default SERVERURL
